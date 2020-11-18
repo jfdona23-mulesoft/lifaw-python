@@ -1,22 +1,22 @@
 from lifaw import Lifaw
+from json import dumps
 
 a = Lifaw()
 
-def buildPlainResponse(data):
-    dataLength = len(data)
-    h = b"HTTP/1.1 200 OK\n \
-          Content-Type: text/plain; charset=UTF-8\n \
-          Content-Length: %x \n\n" % dataLength
-    return h + data
-
 def index():
-    data = b"landing page"
-    return buildPlainResponse(data)
+    data = "landing page"
+    return a.buildResponse(data)
 
 def hello():
-    data = b"juan rules!!"
-    return buildPlainResponse(data)
+    data = "juan rules!!"
+    return a.buildResponse(data)
+
+def jsonTest():
+    data = {"test": "si", "numero": 23}
+    return a.buildResponse(data, content="application/json")
 
 a.addRoute("/", index)
 a.addRoute("/test", hello)
+a.addRoute("/json", jsonTest)
+a.addRoute("/fake", False)
 a.serveApp("localhost", 8080, debug=False)

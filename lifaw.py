@@ -2,6 +2,8 @@
 Lifaw - light and fast web framework
 """
 import socket
+import types
+from json import dumps
 
 
 class Lifaw:
@@ -27,7 +29,7 @@ class Lifaw:
                 response = self.__routes[m][r]()
                 conn.sendall(response)
             else:
-                conn.sendall(self.returnError())
+                conn.sendall(self.buildErrorResponse("Bad Request", 400))
             if debug:
                 print("REQUEST: \n" + data.decode("utf-8") + "\n")
                 print("RESPONSE: \n" + response.decode("utf-8"))
@@ -37,17 +39,31 @@ class Lifaw:
 
     def addRoute(self, route, func, method="GET"):
         """addRoute"""
+        if not isinstance(func, types.FunctionType):
+            func = self.buildErrorResponse
         self.__routes[method].update({route:func})
         return
 
-    def returnError(self):
-        msg = b"ERROR"
-        dataLength = len(msg)
-        h = b"HTTP/1.1 500 An Error has occurred\n \
-            Content-Type: text/html; charset=UTF-8\n \
-            Content-Length: %x \n\n" % dataLength
+    def buildErrorResponse(self, msg="Default Error", statusCode=500):
+        msgLength = len(msg)
+        h = "HTTP/1.1 %d %s \n \
+            Content-Type: text/html \n \
+            Content-Length: %d \n\n" % (statusCode, msg, msgLength)
+        h = bytes(h, "utf-8")
+        msg = bytes(msg, "utf-8")
         return h + msg
 
+    def buildResponse(self, msg, content="text/html"):
+        if isinstance(msg, dict):
+            msg = dumps(msg)
+        msgLength = len(msg)
+        h = "HTTP/1.1 200 OK \n \
+            Content-Type: %s \n \
+            Content-Length: %x \n\n" % (content, msgLength)
+        h = bytes(h, "utf-8")
+        msg = bytes(msg, "utf-8")
+        return h + msg
+        
 
 if __name__ == "__main__":
     pass
