@@ -15,8 +15,13 @@ def jsonTest():
     data = {"test": "si", "numero": 23}
     return a.buildResponse(data, content="application/json")
 
+def paramTest(params):
+    data = params
+    return a.buildResponse(data)
+
 a.addRoute("/", index)
 a.addRoute("/test", hello)
+a.addRoute("/param", paramTest)
 a.addRoute("/json", jsonTest)
 a.addRoute("/fake", False)
 a.serveApp("localhost", 8080, debug=False)
